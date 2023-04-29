@@ -12,6 +12,8 @@ func _ready():
 	target = Vector2(Global.VP.x / 2, Global.VP.y - 80)
 
 func _physics_process(_delta):
+	if $Highlight.modulate.a > 0:
+		$Highlight.modulate.a -= decay
 	target.x = clamp(target.x, 0, Global.VP.x - 2*width)
 	position = target
 	for c in $Powerups.get_children():
@@ -22,7 +24,12 @@ func _input(event):
 		target.x += event.relative.x
 
 func hit(_ball):
-	pass
+	$Confetti.emitting = true
+	$Highlight.modulate.a = 1.0
+	var wall_sound = get_node_or_null("/root/Game/Wall_Sound")
+	if wall_sound != null:
+		wall_sound.play()
+
 
 func powerup(payload):
 	for c in $Powerups.get_children():

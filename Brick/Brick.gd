@@ -9,12 +9,34 @@ var powerup_prob = 0.1
 func _ready():
 	randomize()
 	position = new_position
+	if score >= 100:
+		$ColorRect.color = Color8(175,94,94)
+	elif score >= 90:
+		$ColorRect.color = Color8(27,94,18)
+	elif score >= 80:
+		$ColorRect.color = Color8(68,39,198)
+	elif score >= 70:
+		$ColorRect.color = Color8(120,179,180)
+	elif score >= 60:
+		$ColorRect.color = Color8(79,79,120)
+	elif score >= 50:
+		$ColorRect.color = Color8(145,1,90)
+	elif score >= 40:
+		$ColorRect.color = Color8(150, 79, 10)
+	elif score >= 30:
+		$ColorRect.color = Color8(16,46,36)
+
+
 
 func _physics_process(_delta):
-	if dying:
+	if dying and not $Confetti.emitting:
 		queue_free()
 
 func hit(_ball):
+	$Confetti.emitting = true
+	var wall_sound = get_node_or_null("/root/Game/Brick_Sound")
+	if wall_sound != null:
+		wall_sound.play()
 	die()
 
 func die():

@@ -4,6 +4,7 @@ var min_speed = 100.0
 var max_speed = 600.0
 var speed_multiplier = 1.0
 var accelerate = false
+var decay = 0.04
 
 var released = true
 
@@ -23,7 +24,9 @@ func _ready():
 func _on_Ball_body_entered(body):
 	if body.has_method("hit"):
 		body.hit(self)
-		accelerate = true	
+		accelerate = true
+		$Highlight.modulate.a = 1.0	
+
 
 func _input(event):
 	if not released and event.is_action_pressed("release"):
@@ -31,11 +34,13 @@ func _input(event):
 		released = true
 
 func _integrate_forces(state):
+	if $Highlight.modulate.a > 0:
+		$Highlight.modulate.a -= decay
 	if not released:
 		var paddle = get_node_or_null("/root/Game/Paddle_Container/Paddle")
 		if paddle != null:
 			state.transform.origin = Vector2(paddle.position.x + paddle.width, paddle.position.y - 30)	
-
+			
 	if position.y > Global.VP.y + 100:
 		die()
 	if accelerate:
@@ -49,11 +54,20 @@ func _integrate_forces(state):
 		state.linear_velocity = state.linear_velocity.normalized() * max_speed * speed_multiplier
 
 func change_size(s):
-	$ColorRect.rect_scale = s
+	$Sprite.scale = s
 	$CollisionShape2D.scale = s
+
+
+func distort():
+  var direction = Vector2(1 + linear_velocity.length() * 2, 1 - linear_velocity.length() * 2)
+  $Images.rotation = linear_velocity.angle()
+  $Images.scale = direction
 
 func change_speed(s):
 	speed_multiplier = s
 
 func die():
+	var die_sound = get_node_or_null("/root/Game/Die_Sound")
+	if die_sound != null:
+		die_sound.play()
 	queue_free()
